@@ -3,635 +3,601 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Guess the Number</title>
+  <title>Mini Game Hub</title>
   <style>
     :root{
-      --bg0:#05060a;
-      --bg1:#0a0f1f;
-      --glass: rgba(255,255,255,.07);
-      --stroke: rgba(255,255,255,.14);
-      --text:#f2f4ff;
-      --muted: rgba(242,244,255,.68);
-
-      --p:#7c3aed; /* purple */
-      --c:#06b6d4; /* cyan */
-      --g:#22c55e; /* green */
-      --y:#f59e0b; /* amber */
-      --r:#ef4444; /* red */
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#1b1b1b;
+      --muted:#666;
+      --line:#e6e6e6;
+      --btn:#111;
+      --btn2:#e9e9e9;
+      --soft:#fafafa;
     }
-
     *{ box-sizing:border-box; }
-    html, body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: Arial, sans-serif;
+      background:var(--bg);
       color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 15% 20%, rgba(124,58,237,.25), transparent 60%),
-        radial-gradient(900px 600px at 90% 10%, rgba(6,182,212,.18), transparent 55%),
-        radial-gradient(900px 700px at 70% 85%, rgba(34,197,94,.14), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
+    a{ color:inherit; text-decoration:none; }
+
+    /* Top nav (matches wireframe) */
+    header{
+      background:var(--card);
+      border-bottom:1px solid var(--line);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    .nav{
+      max-width:1100px;
+      margin:0 auto;
+      padding:16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .logo{
+      font-weight:800;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
+    nav ul{
+      list-style:none;
+      display:flex;
+      gap:18px;
+      padding:0;
+      margin:0;
+      color:var(--muted);
+      font-weight:600;
+    }
+    nav a:hover{ color:var(--text); }
+
+    /* Page container */
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:22px 18px 60px;
+    }
+
+    /* Hero (matches wireframe) */
+    .hero{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:22px;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    .hero h1{
+      margin:0 0 8px;
+      font-size:44px;
+      letter-spacing:-.5px;
+    }
+    .hero p{
+      margin:0 0 14px;
+      color:var(--muted);
+      line-height:1.5;
+      max-width:52ch;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px 16px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      font-size:15px;
+      transition:transform .08s ease;
+      user-select:none;
+    }
+    .btn:active{ transform:scale(.98); }
+    .btn-primary{ background:var(--btn); color:#fff; }
+    .btn-secondary{ background:var(--btn2); color:#111; }
+    .btn-ghost{ background:#fff; border:1px solid var(--line); color:#111; }
+
+    .heroMedia{
+      border:1px dashed #cfcfcf;
+      border-radius:14px;
+      background:var(--soft);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:22px;
-      overflow:hidden;
+      color:var(--muted);
+      font-weight:700;
+      min-height:210px;
+      text-align:center;
+      padding:16px;
     }
 
-    .blob{
-      position:fixed;
-      width:520px; height:520px;
-      filter: blur(60px);
-      opacity:.35;
-      z-index:-1;
-      animation: float 10s ease-in-out infinite;
-    }
-    .blob.b1{ left:-140px; top:-140px; background: radial-gradient(circle, rgba(124,58,237,.9), transparent 60%); }
-    .blob.b2{ right:-160px; top:30px; background: radial-gradient(circle, rgba(6,182,212,.85), transparent 60%); animation-delay:-3s; }
-    .blob.b3{ right:15%; bottom:-220px; background: radial-gradient(circle, rgba(34,197,94,.8), transparent 60%); animation-delay:-6s; }
-    @keyframes float{
-      0%,100%{ transform: translate(0,0) scale(1); }
-      50%{ transform: translate(30px, -20px) scale(1.05); }
+    /* Divider line like wireframe */
+    .divider{
+      height:1px;
+      background:var(--line);
+      margin:18px 0;
     }
 
+    /* 3 cards row (matches wireframe) */
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
     .card{
-      width:min(640px, 96vw);
-      background: var(--glass);
-      border:1px solid var(--stroke);
-      border-radius: 18px;
-      padding: 18px;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 22px 80px rgba(0,0,0,.38);
-      position:relative;
-      overflow:hidden;
-    }
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background:
-        radial-gradient(520px 220px at 20% 0%, rgba(124,58,237,.18), transparent 60%),
-        radial-gradient(520px 240px at 90% 10%, rgba(6,182,212,.14), transparent 60%);
-      pointer-events:none;
-    }
-    .card > *{ position:relative; }
-
-    header{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:16px;
+      min-height:180px;
       display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      flex-wrap:wrap;
+      flex-direction:column;
+      gap:10px;
     }
-    h1{
+    .card h3{
       margin:0;
-      font-size: clamp(22px, 3vw, 30px);
-      letter-spacing:.2px;
-      line-height:1.15;
+      font-size:18px;
     }
-    .sub{
-      margin:6px 0 0;
+    .card .hint{
+      margin:0;
       color:var(--muted);
       font-size:14px;
+      line-height:1.4;
+    }
+    .card .area{
+      background:var(--soft);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      min-height:78px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      justify-content:center;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    input, select{
+      padding:11px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      font-size:14px;
+      outline:none;
+      min-width:140px;
+      background:#fff;
+    }
+    .status{
+      font-size:14px;
+      color:var(--text);
       line-height:1.35;
     }
-
-    .topControls{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    .chip{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--stroke);
+    .small{
+      font-size:13px;
       color:var(--muted);
-      font-size:13px;
-    }
-    select{
-      border:none;
-      outline:none;
-      background:transparent;
-      color:var(--text);
-      cursor:pointer;
-      font-size:13px;
     }
 
-    .switch{
+    /* Portfolio section (matches wireframe bottom) */
+    .sectionTitle{
       display:flex;
       align-items:center;
-      gap:10px;
-      user-select:none;
+      gap:14px;
+      margin:8px 0 10px;
     }
-    .switch input{
-      width:42px; height:24px;
-      appearance:none;
-      background: rgba(255,255,255,.12);
-      border:1px solid var(--stroke);
-      border-radius:999px;
-      position:relative;
-      outline:none;
-      cursor:pointer;
-      transition:.2s ease;
+    .sectionTitle h2{
+      margin:0;
+      font-size:26px;
+      letter-spacing:-.3px;
     }
-    .switch input:checked{
-      background: linear-gradient(90deg, rgba(124,58,237,.95), rgba(6,182,212,.9));
-      border-color: rgba(255,255,255,.2);
-    }
-    .switch input::after{
-      content:"";
-      width:18px; height:18px;
-      background:#fff;
-      border-radius:50%;
-      position:absolute;
-      top:2px; left:2px;
-      transition:.2s ease;
-    }
-    .switch input:checked::after{ left:21px; }
-
-    .statsRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.12);
-      color:var(--muted);
-      font-size:13px;
-    }
-    .dot{
-      width:9px; height:9px;
-      border-radius:50%;
-      background: linear-gradient(90deg, var(--p), var(--c));
-      box-shadow: 0 0 16px rgba(124,58,237,.6);
-    }
-
-    .inputRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-    input[type="number"]{
+    .sectionTitle .line{
+      height:1px;
+      background:var(--line);
       flex:1;
-      min-width:220px;
-      padding:13px 14px;
+    }
+    .portfolio{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+    .tile{
+      background:var(--card);
+      border:1px solid var(--line);
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
-      font-size:16px;
-      outline:none;
-      transition:.2s ease;
-    }
-    input[type="number"]:focus{
-      border-color: rgba(6,182,212,.6);
-      box-shadow: 0 0 0 4px rgba(6,182,212,.15);
-    }
-
-    button{
-      padding:13px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      font-size:15px;
-      cursor:pointer;
-      transition: transform .08s ease, box-shadow .2s ease, opacity .15s ease;
-      white-space:nowrap;
-    }
-    button:hover{
-      box-shadow: 0 12px 36px rgba(0,0,0,.25);
-      transform: translateY(-1px);
-    }
-    button:active{ transform: translateY(0); }
-    button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
-
-    .primary{
-      border:none;
-      background: linear-gradient(90deg, rgba(124,58,237,.95), rgba(6,182,212,.9));
-      box-shadow: 0 12px 40px rgba(124,58,237,.2);
-    }
-    .danger{
-      border:none;
-      background: linear-gradient(90deg, rgba(239,68,68,.95), rgba(245,158,11,.9));
-      box-shadow: 0 12px 40px rgba(245,158,11,.14);
-    }
-
-    .actionsRow{
+      padding:14px;
+      min-height:170px;
       display:flex;
+      flex-direction:column;
+      justify-content:space-between;
       gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
     }
-
-    .status{
-      margin-top:14px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      min-height:54px;
+    .thumb{
+      border:1px dashed #cfcfcf;
+      border-radius:12px;
+      background:var(--soft);
+      min-height:95px;
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .status .msg{ line-height:1.25; }
-    .mini{
+      justify-content:center;
       color:var(--muted);
-      font-size:13px;
-      white-space:nowrap;
+      font-weight:700;
+    }
+    footer{
+      margin-top:18px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px 16px;
+      display:flex;
+      justify-content:center;
+      gap:18px;
+      color:var(--muted);
+      font-size:20px;
     }
 
-    .meterWrap{ margin-top:12px; }
-    .meterLabel{
-      display:flex; justify-content:space-between; align-items:center;
-      color: var(--muted);
-      font-size:13px;
-      margin-bottom:8px;
-    }
-    .meter{
-      height:12px;
-      border-radius:999px;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
-      overflow:hidden;
-    }
-    .meterFill{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(6,182,212,.95), rgba(34,197,94,.9), rgba(245,158,11,.95), rgba(239,68,68,.95));
-      transition: width .25s ease;
-    }
-
-    .shake{ animation: shake .25s linear; }
-    @keyframes shake{
-      0%{ transform: translateX(0); }
-      25%{ transform: translateX(-7px); }
-      50%{ transform: translateX(7px); }
-      75%{ transform: translateX(-4px); }
-      100%{ transform: translateX(0); }
-    }
-    .pop{ animation: pop .22s ease; }
-    @keyframes pop{
-      0%{ transform: scale(.98); }
-      70%{ transform: scale(1.02); }
-      100%{ transform: scale(1); }
-    }
-
-    .confetti{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      overflow:hidden;
-      z-index:10;
-    }
-    .confetti span{
-      position:absolute;
-      width:10px; height:14px;
-      border-radius:3px;
-      opacity:.95;
-      animation: fall 1.35s linear forwards;
-    }
-    @keyframes fall{
-      0%{ transform: translateY(-20px) rotate(0deg); }
-      100%{ transform: translateY(calc(100vh + 40px)) rotate(360deg); }
+    /* Responsive */
+    @media (max-width: 900px){
+      .hero{ grid-template-columns: 1fr; }
+      .cards{ grid-template-columns: 1fr; }
+      .portfolio{ grid-template-columns: 1fr; }
+      .hero h1{ font-size:38px; }
     }
   </style>
 </head>
 <body>
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
 
-  <main class="card" id="card">
-    <header>
-      <div>
-        <h1>Guess the Number</h1>
-      </div>
+<header>
+  <div class="nav">
+    <div class="logo">Mini Game Hub</div>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#games">Games</a></li>
+        <li><a href="#extras">Extras</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
-      <div class="topControls">
-        <div class="chip">
-          <span>Difficulty</span>
-          <select id="difficultySelect">
+<main class="wrap" id="home">
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1>Welcome!</h1>
+      <p>
+        Pick a game below. This site is built with HTML, CSS, and JavaScript and hosted on GitHub Pages.
+      </p>
+      <button class="btn btn-primary" id="getStartedBtn">Get Started</button>
+      <div class="small" style="margin-top:10px;">Tip: Try “Guess the Number” first.</div>
+    </div>
+
+    <div class="heroMedia">
+      Image / Illustration<br>
+      (You can replace this later)
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 3 GAME CARDS -->
+  <section id="games" class="cards">
+    <!-- Guess the Number -->
+    <div class="card">
+      <h3>Guess the Number</h3>
+      <p class="hint">Choose a difficulty, then guess the secret number.</p>
+
+      <div class="area">
+        <div class="row">
+          <select id="difficulty">
             <option value="easy">Easy (1–50)</option>
             <option value="normal" selected>Normal (1–100)</option>
             <option value="hard">Hard (1–500)</option>
           </select>
+          <button class="btn btn-ghost" id="newGameBtn">New Game</button>
         </div>
 
-        <label class="chip switch" title="Toggle sound">
-          <input id="soundToggle" type="checkbox" checked />
-          <span>Sound</span>
-        </label>
+        <div class="row">
+          <input id="guessInput" type="number" placeholder="Enter guess..." />
+          <button class="btn btn-primary" id="guessBtn">Guess</button>
+          <button class="btn btn-secondary" id="hintBtn">Hint</button>
+        </div>
+
+        <div class="status" id="guessStatus">Press “New Game” to begin.</div>
+        <div class="small">
+          Attempts: <strong id="attempts">0</strong> •
+          Hints left: <strong id="hintsLeft">0</strong> •
+          Best: <strong id="bestScore">—</strong>
+        </div>
       </div>
-    </header>
-
-    <div class="statsRow">
-      <span class="pill"><span class="dot"></span><span id="rangeBadge">Range: 1–100</span></span>
-      <span class="pill">Attempts: <b id="attempts">0</b></span>
-      <span class="pill">Hints: <b id="hintsLeft">2</b></span>
-      <span class="pill">Best: <b id="bestScore">—</b></span>
     </div>
 
-    <div class="inputRow">
-      <input id="guessInput" type="number" placeholder="Enter a guess..." />
-      <button class="primary" id="guessBtn">Guess</button>
-      <button class="danger" id="resetBtn">Reset</button>
-    </div>
+    <!-- Joke of the Day -->
+    <div class="card">
+      <h3>Joke of the Day</h3>
+      <p class="hint">Click to generate a random joke (clean + short).</p>
 
-    <div class="actionsRow">
-      <button id="hintBtn">Hint</button>
-      <button id="newNumberBtn" title="New secret number (keeps difficulty)">New Number</button>
-    </div>
-
-    <div class="status" id="statusBox">
-      <div class="msg" id="statusText"><b>Ready.</b> Make your first guess 👀</div>
-      <div class="mini">Press Enter</div>
-    </div>
-
-    <div class="meterWrap">
-      <div class="meterLabel">
-        <span>Warm/Cold</span>
-        <span id="warmLabel">Start guessing</span>
+      <div class="area">
+        <div class="row">
+          <button class="btn btn-primary" id="jokeBtn">Tell me a joke</button>
+          <button class="btn btn-ghost" id="jokeCopyBtn">Copy</button>
+        </div>
+        <div class="status" id="jokeText">Ready when you are 😄</div>
       </div>
-      <div class="meter"><div class="meterFill" id="meterFill"></div></div>
     </div>
-  </main>
 
-  <div class="confetti" id="confetti"></div>
+    <!-- Did U Know -->
+    <div class="card">
+      <h3>Did U Know</h3>
+      <p class="hint">Get a fun fact every time you click.</p>
 
-  <script>
-    const DIFFICULTY = {
-      easy:   { label:"Easy",   min: 1, max: 50,  hints: 2 },
-      normal: { label:"Normal", min: 1, max: 100, hints: 2 },
-      hard:   { label:"Hard",   min: 1, max: 500, hints: 3 },
-    };
+      <div class="area">
+        <div class="row">
+          <button class="btn btn-primary" id="factBtn">Give me a fact</button>
+          <button class="btn btn-ghost" id="factCopyBtn">Copy</button>
+        </div>
+        <div class="status" id="factText">Tap the button for a fun fact 🧠</div>
+      </div>
+    </div>
+  </section>
 
-    const difficultySelect = document.getElementById("difficultySelect");
-    const soundToggle = document.getElementById("soundToggle");
+  <div class="divider"></div>
 
-    const guessInput = document.getElementById("guessInput");
-    const statusText = document.getElementById("statusText");
-    const statusBox = document.getElementById("statusBox");
+  <!-- "Portfolio" area from wireframe = Extras / More -->
+  <section id="extras">
+    <div class="sectionTitle">
+      <h2>Extras</h2>
+      <div class="line"></div>
+    </div>
 
-    const attemptsEl = document.getElementById("attempts");
-    const hintsEl = document.getElementById("hintsLeft");
-    const bestEl = document.getElementById("bestScore");
-    const rangeBadge = document.getElementById("rangeBadge");
+    <div class="portfolio">
+      <div class="tile">
+        <div class="thumb">Project 1</div>
+        <button class="btn btn-secondary" id="view1">View</button>
+      </div>
+      <div class="tile">
+        <div class="thumb">Project 2</div>
+        <button class="btn btn-secondary" id="view2">View</button>
+      </div>
+      <div class="tile">
+        <div class="thumb">Project 3</div>
+        <button class="btn btn-secondary" id="view3">View</button>
+      </div>
+    </div>
+  </section>
 
-    const guessBtn = document.getElementById("guessBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const hintBtn = document.getElementById("hintBtn");
-    const newNumberBtn = document.getElementById("newNumberBtn");
+  <footer>
+    💬 ❤️ ↗️
+  </footer>
+</main>
 
-    const meterFill = document.getElementById("meterFill");
-    const warmLabel = document.getElementById("warmLabel");
+<script>
+  // ---------------------------
+  // Smooth "Get Started"
+  // ---------------------------
+  document.getElementById("getStartedBtn").addEventListener("click", () => {
+    document.getElementById("games").scrollIntoView({ behavior: "smooth" });
+  });
 
-    const confetti = document.getElementById("confetti");
-    const card = document.getElementById("card");
+  // ---------------------------
+  // Guess The Number (ALL features)
+  // ---------------------------
+  const DIFF = {
+    easy:   { min: 1, max: 50,  hints: 2 },
+    normal: { min: 1, max: 100, hints: 2 },
+    hard:   { min: 1, max: 500, hints: 3 },
+  };
 
-    let mode = "normal";
-    let secret = 0;
-    let attempts = 0;
-    let minR = 1;
-    let maxR = 100;
-    let hintsLeft = 2;
-    let gameOver = false;
+  const difficultyEl = document.getElementById("difficulty");
+  const guessInputEl = document.getElementById("guessInput");
+  const guessBtn = document.getElementById("guessBtn");
+  const newGameBtn = document.getElementById("newGameBtn");
+  const hintBtn = document.getElementById("hintBtn");
 
-    function beep(type){
-      if(!soundToggle.checked) return;
-      try{
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = "sine";
-        let freq = 440, dur = 0.09;
-        if(type==="low")  { freq=320; dur=0.09; }
-        if(type==="high") { freq=620; dur=0.09; }
-        if(type==="win")  { freq=920; dur=0.14; }
-        if(type==="err")  { freq=200; dur=0.10; }
-        if(type==="hint") { freq=520; dur=0.10; }
-        o.frequency.value = freq;
-        g.gain.value = 0.06;
-        o.connect(g); g.connect(ctx.destination);
-        o.start(); o.stop(ctx.currentTime + dur);
-        setTimeout(()=>ctx.close(), 220);
-      }catch(e){}
+  const guessStatus = document.getElementById("guessStatus");
+  const attemptsEl = document.getElementById("attempts");
+  const hintsLeftEl = document.getElementById("hintsLeft");
+  const bestScoreEl = document.getElementById("bestScore");
+
+  let mode = "normal";
+  let secret = 0;
+  let attempts = 0;
+  let hintsLeft = 0;
+  let gameOver = false;
+
+  function bestKey(m){ return `mgh_best_${m}`; }
+  function getBest(m){
+    const v = localStorage.getItem(bestKey(m));
+    return v ? Number(v) : null;
+  }
+  function setBest(m, tries){
+    localStorage.setItem(bestKey(m), String(tries));
+  }
+
+  function randInt(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function syncBest(){
+    const best = getBest(mode);
+    bestScoreEl.textContent = best ? `${best} tries` : "—";
+  }
+
+  function setGuessStatus(text){ guessStatus.innerHTML = text; }
+
+  function startGame(){
+    mode = difficultyEl.value;
+    const cfg = DIFF[mode];
+
+    secret = randInt(cfg.min, cfg.max);
+    attempts = 0;
+    hintsLeft = cfg.hints;
+    gameOver = false;
+
+    guessInputEl.min = cfg.min;
+    guessInputEl.max = cfg.max;
+    guessInputEl.placeholder = `Enter guess (${cfg.min}-${cfg.max})`;
+
+    attemptsEl.textContent = attempts;
+    hintsLeftEl.textContent = hintsLeft;
+    syncBest();
+
+    setGuessStatus(`Game started. Guess a number between <strong>${cfg.min}</strong> and <strong>${cfg.max}</strong>.`);
+    guessInputEl.value = "";
+    guessInputEl.focus();
+  }
+
+  function handleGuess(){
+    if(gameOver) return;
+
+    const raw = guessInputEl.value;
+    const guess = Number(raw);
+    const cfg = DIFF[mode];
+
+    if(!raw){
+      setGuessStatus("Type a number first.");
+      return;
+    }
+    if(guess < cfg.min || guess > cfg.max){
+      setGuessStatus(`Keep it between <strong>${cfg.min}</strong> and <strong>${cfg.max}</strong>.`);
+      return;
     }
 
-    const bestKey = (m)=>`neon_clean_best_${m}`;
-    const getBest = (m)=> {
-      const v = localStorage.getItem(bestKey(m));
-      return v ? Number(v) : null;
-    };
-    const setBest = (m, tries)=> localStorage.setItem(bestKey(m), String(tries));
+    attempts++;
+    attemptsEl.textContent = attempts;
 
-    function animate(cls){
-      card.classList.remove("shake","pop");
-      void card.offsetWidth;
-      card.classList.add(cls);
-    }
-
-    function randInt(min,max){
-      return Math.floor(Math.random()*(max-min+1))+min;
-    }
-
-    function updateBestUI(){
+    if(guess === secret){
+      gameOver = true;
       const best = getBest(mode);
-      bestEl.textContent = best ? `${best} tries` : "—";
-    }
 
-    function updateUI(){
-      attemptsEl.textContent = attempts;
-      hintsEl.textContent = hintsLeft;
-      rangeBadge.textContent = `Range: ${minR}–${maxR}`;
-      updateBestUI();
-
-      guessBtn.disabled = gameOver;
-      hintBtn.disabled = gameOver || hintsLeft <= 0;
-    }
-
-    function setWarmCold(diff){
-      const cfg = DIFFICULTY[mode];
-      const maxDiff = cfg.max - cfg.min;
-      const closeness = 1 - (diff / maxDiff);
-      const pct = Math.max(0, Math.min(100, Math.round(closeness * 100)));
-      meterFill.style.width = pct + "%";
-
-      let label = "Cold 🧊";
-      if(pct >= 85) label = "HOT 🔥";
-      else if(pct >= 65) label = "Warm 😮‍💨";
-      else if(pct >= 45) label = "Cool 🙂";
-      warmLabel.textContent = label;
-    }
-
-    function launchConfetti(){
-      confetti.innerHTML = "";
-      const colors = ["#7c3aed","#06b6d4","#22c55e","#f59e0b","#ef4444","#ffffff"];
-      for(let i=0;i<80;i++){
-        const p = document.createElement("span");
-        p.style.left = (Math.random()*100) + "vw";
-        p.style.top = "-20px";
-        const s = 8 + Math.random()*8;
-        p.style.width = s + "px";
-        p.style.height = (s*1.2) + "px";
-        p.style.background = colors[Math.floor(Math.random()*colors.length)];
-        p.style.animationDelay = (Math.random()*0.15) + "s";
-        p.style.transform = `rotate(${Math.random()*360}deg)`;
-        confetti.appendChild(p);
-      }
-      setTimeout(()=> confetti.innerHTML = "", 1600);
-    }
-
-    function applyDifficulty(newMode){
-      mode = newMode;
-      const cfg = DIFFICULTY[mode];
-      minR = cfg.min;
-      maxR = cfg.max;
-      hintsLeft = cfg.hints;
-
-      guessInput.min = String(cfg.min);
-      guessInput.max = String(cfg.max);
-      guessInput.placeholder = `Enter a guess (${cfg.min}-${cfg.max})`;
-
-      meterFill.style.width = "0%";
-      warmLabel.textContent = "Start guessing";
-    }
-
-    function newSecret(){
-      const cfg = DIFFICULTY[mode];
-      secret = randInt(cfg.min, cfg.max);
-    }
-
-    function startGame(keepMode=true){
-      if(!keepMode) mode = "normal";
-      applyDifficulty(mode);
-      newSecret();
-      attempts = 0;
-      gameOver = false;
-
-      statusText.innerHTML = "<b>Ready.</b> Make your first guess 👀";
-      guessInput.value = "";
-      guessInput.focus();
-      updateUI();
-    }
-
-    function giveHint(){
-      if(gameOver || hintsLeft <= 0) return;
-      hintsLeft--;
-      beep("hint");
-      animate("pop");
-
-      const cfg = DIFFICULTY[mode];
-      const type = Math.random() < 0.5 ? "parity" : "window";
-
-      if(type === "parity"){
-        statusText.innerHTML = `💡 Hint: It’s <b>${secret % 2 === 0 ? "EVEN" : "ODD"}</b>.`;
+      if(!best || attempts < best){
+        setBest(mode, attempts);
+        syncBest();
+        setGuessStatus(`✅ Correct! It was <strong>${secret}</strong>. You got it in <strong>${attempts}</strong> tries. 🏆 New best!`);
       } else {
-        const spread = Math.max(6, Math.floor((cfg.max - cfg.min) * 0.08));
-        const lo = Math.max(cfg.min, secret - spread);
-        const hi = Math.min(cfg.max, secret + spread);
-        statusText.innerHTML = `💡 Hint: It’s between <b>${lo}</b> and <b>${hi}</b>.`;
+        setGuessStatus(`✅ Correct! It was <strong>${secret}</strong>. You got it in <strong>${attempts}</strong> tries.`);
       }
-      updateUI();
+      return;
     }
 
-    function handleGuess(){
-      if(gameOver) return;
-
-      const raw = guessInput.value;
-      const guess = Number(raw);
-      const cfg = DIFFICULTY[mode];
-
-      if(!raw){
-        beep("err"); animate("shake");
-        statusText.textContent = "Type a number first.";
-        return;
-      }
-      if(Number.isNaN(guess)){
-        beep("err"); animate("shake");
-        statusText.textContent = "That doesn’t look like a number.";
-        return;
-      }
-      if(guess < cfg.min || guess > cfg.max){
-        beep("err"); animate("shake");
-        statusText.innerHTML = `Keep it between <b>${cfg.min}</b> and <b>${cfg.max}</b>.`;
-        return;
-      }
-
-      attempts++;
-
-      const diff = Math.abs(guess - secret);
-      setWarmCold(diff);
-
-      if(guess === secret){
-        beep("win");
-        animate("pop");
-        launchConfetti();
-        gameOver = true;
-
-        const best = getBest(mode);
-        if(!best || attempts < best){
-          setBest(mode, attempts);
-          statusText.innerHTML = `✅ You got it! Number was <b>${secret}</b>. <b>${attempts}</b> tries. 🏆 New best!`;
-        } else {
-          statusText.innerHTML = `✅ You got it! Number was <b>${secret}</b>. <b>${attempts}</b> tries.`;
-        }
-        updateUI();
-        return;
-      }
-
-      if(guess < secret){
-        beep("low"); animate("shake");
-        statusText.textContent = "Too low ⬇️ Try again.";
-        minR = Math.max(minR, guess + 1);
-      } else {
-        beep("high"); animate("shake");
-        statusText.textContent = "Too high ⬆️ Try again.";
-        maxR = Math.min(maxR, guess - 1);
-      }
-
-      if(minR > maxR){
-        minR = cfg.min;
-        maxR = cfg.max;
-      }
-
-      guessInput.value = "";
-      guessInput.focus();
-      updateUI();
+    if(guess < secret){
+      setGuessStatus("Too low ⬇️ Try again.");
+    } else {
+      setGuessStatus("Too high ⬆️ Try again.");
     }
 
-    guessBtn.addEventListener("click", handleGuess);
-    guessInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleGuess(); });
+    guessInputEl.value = "";
+    guessInputEl.focus();
+  }
 
-    resetBtn.addEventListener("click", ()=> startGame(true));
-    newNumberBtn.addEventListener("click", ()=> startGame(true));
-    hintBtn.addEventListener("click", giveHint);
+  function giveHint(){
+    if(gameOver) return;
+    if(hintsLeft <= 0){
+      setGuessStatus("No hints left.");
+      return;
+    }
 
-    difficultySelect.addEventListener("change", ()=>{
-      mode = difficultySelect.value;
-      startGame(true);
-    });
+    hintsLeft--;
+    hintsLeftEl.textContent = hintsLeft;
 
-    difficultySelect.value = mode;
-    startGame(true);
-  </script>
+    const cfg = DIFF[mode];
+    const type = Math.random() < 0.5 ? "parity" : "window";
+
+    if(type === "parity"){
+      setGuessStatus(`💡 Hint: The number is <strong>${secret % 2 === 0 ? "EVEN" : "ODD"}</strong>.`);
+    } else {
+      const spread = Math.max(6, Math.floor((cfg.max - cfg.min) * 0.08));
+      const lo = Math.max(cfg.min, secret - spread);
+      const hi = Math.min(cfg.max, secret + spread);
+      setGuessStatus(`💡 Hint: The number is between <strong>${lo}</strong> and <strong>${hi}</strong>.`);
+    }
+  }
+
+  newGameBtn.addEventListener("click", startGame);
+  guessBtn.addEventListener("click", handleGuess);
+  hintBtn.addEventListener("click", giveHint);
+  difficultyEl.addEventListener("change", () => {
+    // keep best display updated even before starting
+    mode = difficultyEl.value;
+    syncBest();
+  });
+  guessInputEl.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") handleGuess();
+  });
+
+  // Initialize best display
+  syncBest();
+
+  // ---------------------------
+  // Joke of the Day (local list)
+  // ---------------------------
+  const jokes = [
+    "Why don’t programmers like nature? Too many bugs.",
+    "I told my computer I needed a break… it said: 'No problem, I’ll go to sleep.'",
+    "Why did the developer go broke? Because they used up all their cache.",
+    "Debugging: being the detective in a crime movie where you are also the criminal.",
+    "Why do Java developers wear glasses? Because they don’t C#.",
+    "My code works… I have no idea why."
+  ];
+
+  const jokeText = document.getElementById("jokeText");
+  document.getElementById("jokeBtn").addEventListener("click", () => {
+    const j = jokes[Math.floor(Math.random() * jokes.length)];
+    jokeText.textContent = j;
+  });
+
+  document.getElementById("jokeCopyBtn").addEventListener("click", async () => {
+    try{
+      await navigator.clipboard.writeText(jokeText.textContent);
+      jokeText.textContent = "✅ Copied!";
+      setTimeout(() => jokeText.textContent = "Ready when you are 😄", 900);
+    } catch {
+      jokeText.textContent = "Copy not supported in this browser.";
+    }
+  });
+
+  // ---------------------------
+  // Did U Know (local list)
+  // ---------------------------
+  const facts = [
+    "Honey never spoils — sealed honey has been found still edible after thousands of years.",
+    "Octopuses have three hearts and blue blood.",
+    "A day on Venus is longer than a year on Venus.",
+    "Bananas are berries, but strawberries aren’t.",
+    "The Eiffel Tower can grow about 6 inches taller in the summer due to heat expansion.",
+    "Sharks existed before trees."
+  ];
+
+  const factText = document.getElementById("factText");
+  document.getElementById("factBtn").addEventListener("click", () => {
+    const f = facts[Math.floor(Math.random() * facts.length)];
+    factText.textContent = f;
+  });
+
+  document.getElementById("factCopyBtn").addEventListener("click", async () => {
+    try{
+      await navigator.clipboard.writeText(factText.textContent);
+      factText.textContent = "✅ Copied!";
+      setTimeout(() => factText.textContent = "Tap the button for a fun fact 🧠", 900);
+    } catch {
+      factText.textContent = "Copy not supported in this browser.";
+    }
+  });
+
+  // ---------------------------
+  // Portfolio "View" buttons (placeholders)
+  // ---------------------------
+  document.getElementById("view1").addEventListener("click", () => alert("Project 1 placeholder"));
+  document.getElementById("view2").addEventListener("click", () => alert("Project 2 placeholder"));
+  document.getElementById("view3").addEventListener("click", () => alert("Project 3 placeholder"));
+</script>
 </body>
 </html>
-
-
