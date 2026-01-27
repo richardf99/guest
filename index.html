@@ -3,167 +3,1577 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Guess the Number</title>
+  <title>Guess the Number — Neon</title>
   <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#0a0f1f;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.12);
+      --text:#f2f4ff;
+      --muted: rgba(242,244,255,.68);
+
+      --a:#7c3aed; /* purple */
+      --b:#22c55e; /* green */
+      --c:#06b6d4; /* cyan */
+      --d:#f59e0b; /* amber */
+      --e:#ef4444; /* red */
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
     body{
-      font-family: Arial, sans-serif;
-      background:#f4f4f4;
       margin:0;
-      padding:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 10% 20%, rgba(124,58,237,.25), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, rgba(6,182,212,.18), transparent 55%),
+        radial-gradient(900px 700px at 70% 85%, rgba(34,197,94,.14), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
       display:flex;
-      min-height:100vh;
       align-items:center;
       justify-content:center;
+      padding:24px;
+      overflow:hidden;
     }
-    .card{
-      width:min(520px, 92vw);
+
+    /* animated glow blobs */
+    .blob{
+      position:fixed;
+      width:520px; height:520px;
+      filter: blur(60px);
+      opacity:.35;
+      z-index:-1;
+      animation: float 10s ease-in-out infinite;
+    }
+    .blob.p1{ left:-120px; top:-120px; background: radial-gradient(circle, rgba(124,58,237,.9), transparent 60%); }
+    .blob.p2{ right:-140px; top:60px; background: radial-gradient(circle, rgba(6,182,212,.85), transparent 60%); animation-delay:-3s; }
+    .blob.p3{ right:10%; bottom:-200px; background: radial-gradient(circle, rgba(34,197,94,.8), transparent 60%); animation-delay:-6s; }
+    @keyframes float{
+      0%,100%{ transform: translate(0,0) scale(1); }
+      50%{ transform: translate(30px, -20px) scale(1.05); }
+    }
+
+    .wrap{
+      width:min(900px, 96vw);
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .title h1{
+      margin:0;
+      font-size: clamp(26px, 3.2vw, 36px);
+      letter-spacing:.2px;
+      line-height:1.1;
+    }
+    .title p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.4;
+      max-width: 560px;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      color: var(--muted);
+      font-size:14px;
+    }
+
+    select{
+      border:none;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .switch{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+      cursor:pointer;
+    }
+    .switch input{
+      width:42px; height:24px;
+      appearance:none;
+      background: rgba(255,255,255,.12);
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      position:relative;
+      outline:none;
+      cursor:pointer;
+      transition: .2s ease;
+    }
+    .switch input:checked{
+      background: linear-gradient(90deg, rgba(124,58,237,.9), rgba(6,182,212,.8));
+      border-color: rgba(255,255,255,.2);
+    }
+    .switch input::after{
+      content:"";
+      width:18px; height:18px;
       background:#fff;
-      padding:28px;
-      border-radius:12px;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
+      border-radius:50%;
+      position:absolute;
+      top:2px; left:2px;
+      transition:.2s ease;
     }
-    h1{ margin:0 0 8px; color:#222; }
-    p{ margin:0 0 16px; color:#555; line-height:1.4; }
+    .switch input:checked::after{
+      left:21px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+      .toolbar{ justify-content:flex-start; }
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      padding: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 70px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(500px 200px at 30% 0%, rgba(124,58,237,.18), transparent 60%),
+                  radial-gradient(420px 240px at 90% 20%, rgba(6,182,212,.14), transparent 60%);
+      pointer-events:none;
+    }
+    .card > *{ position:relative; }
+
+    .badgeRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      color: var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .pillDot{
+      width:9px; height:9px;
+      border-radius:50%;
+      background: linear-gradient(90deg, var(--a), var(--c));
+      box-shadow: 0 0 16px rgba(124,58,237,.6);
+    }
+
     .row{
       display:flex;
       gap:10px;
-      margin-top:10px;
       flex-wrap:wrap;
+      margin-top:10px;
     }
-    input{
+
+    input[type="number"]{
       flex:1;
-      min-width:160px;
-      padding:12px 14px;
-      border:1px solid #ddd;
-      border-radius:10px;
+      min-width:220px;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
       font-size:16px;
       outline:none;
+      transition:.2s ease;
     }
+    input[type="number"]:focus{
+      border-color: rgba(6,182,212,.6);
+      box-shadow: 0 0 0 4px rgba(6,182,212,.15);
+    }
+
     button{
-      padding:12px 14px;
-      border:none;
-      border-radius:10px;
-      font-size:16px;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-size:15px;
       cursor:pointer;
+      transition: transform .08s ease, box-shadow .2s ease, background .2s ease, opacity .15s ease;
     }
-    .btn-primary{ background:#111; color:#fff; }
-    .btn-secondary{ background:#e9e9e9; color:#111; }
+    button:hover{
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transform: translateY(-1px);
+    }
+    button:active{ transform: translateY(0); }
+    button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+    .primary{
+      border:none;
+      background: linear-gradient(90deg, rgba(124,58,237,.95), rgba(6,182,212,.9));
+      box-shadow: 0 12px 36px rgba(124,58,237,.22);
+    }
+    .danger{
+      border:none;
+      background: linear-gradient(90deg, rgba(239,68,68,.95), rgba(245,158,11,.9));
+      box-shadow: 0 12px 36px rgba(245,158,11,.18);
+    }
+
     .status{
-      margin-top:14px;
+      margin-top:12px;
       padding:12px 14px;
-      border-radius:10px;
-      background:#f8f8f8;
-      color:#222;
-      min-height:24px;
-    }
-    .meta{
-      margin-top:10px;
-      color:#666;
-      font-size:14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      min-height:56px;
       display:flex;
+      align-items:center;
       justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
+      gap:12px;
     }
-    .hint{
-      font-weight:bold;
+    .status strong{ color:#fff; }
+    .status .left{
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .status .right{
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+
+    .mini{
+      font-size:13px;
+      color: var(--muted);
+    }
+
+    .meta{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 560px){
+      .meta{ grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+    }
+    .stat .k{ font-size:12px; color: var(--muted); }
+    .stat .v{ font-size:16px; margin-top:4px; font-weight:700; }
+
+    /* warm/cold meter */
+    .meterWrap{ margin-top:12px; }
+    .meterLabel{
+      display:flex; justify-content:space-between; align-items:center;
+      color: var(--muted);
+      font-size:13px;
+      margin-bottom:8px;
+    }
+    .meter{
+      height:12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+    }
+    .meterFill{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(6,182,212,.95), rgba(34,197,94,.9), rgba(245,158,11,.95), rgba(239,68,68,.95));
+      transition: width .25s ease;
+    }
+
+    /* right panel list */
+    .list{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .item{
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+    }
+    .item b{ display:block; margin-bottom:4px; }
+    .item span{ color: var(--muted); font-size:13px; }
+
+    /* shake/pop */
+    .shake{ animation: shake .25s linear; }
+    @keyframes shake{
+      0%{ transform: translateX(0); }
+      25%{ transform: translateX(-7px); }
+      50%{ transform: translateX(7px); }
+      75%{ transform: translateX(-4px); }
+      100%{ transform: translateX(0); }
+    }
+    .pop{ animation: pop .22s ease; }
+    @keyframes pop{
+      0%{ transform: scale(.98); }
+      70%{ transform: scale(1.02); }
+      100%{ transform: scale(1); }
+    }
+
+    /* confetti */
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:10;
+    }
+    .confetti span{
+      position:absolute;
+      width:10px; height:14px;
+      border-radius:3px;
+      opacity:.95;
+      animation: fall 1.35s linear forwards;
+    }
+    @keyframes fall{
+      0%{ transform: translateY(-20px) rotate(0deg); }
+      100%{ transform: translateY(calc(100vh + 40px)) rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>Guess the Number</h1>
-    <p>I’m thinking of a number between <strong>1</strong> and <strong>100</strong>. Try to guess it.</p>
+  <div class="blob p1"></div>
+  <div class="blob p2"></div>
+  <div class="blob p3"></div>
 
-    <div class="row">
-      <input id="guessInput" type="number" min="1" max="100" placeholder="Enter a number (1-100)" />
-      <button class="btn-primary" id="guessBtn">Guess</button>
-      <button class="btn-secondary" id="resetBtn">Reset</button>
-    </div>
+  <main class="wrap">
+    <header>
+      <div class="title">
+        <h1>Guess the Number — Neon Edition</h1>
+        <p>Pick a difficulty, guess the secret number, use limited hints, and beat your best score (saved per mode).</p>
+      </div>
 
-    <div class="status" id="statusText">Make your first guess 👀</div>
+      <div class="toolbar">
+        <div class="chip">
+          <span>Difficulty</span>
+          <select id="difficultySelect" aria-label="Difficulty">
+            <option value="easy">Easy (1–50)</option>
+            <option value="normal" selected>Normal (1–100)</option>
+            <option value="hard">Hard (1–500)</option>
+          </select>
+        </div>
 
-    <div class="meta">
-      <div>Attempts: <span id="attempts">0</span></div>
-      <div class="hint" id="rangeHint">Range: 1–100</div>
-    </div>
+        <label class="chip switch" title="Toggle sound effects">
+          <input id="soundToggle" type="checkbox" checked />
+          <span>Sound</span>
+        </label>
+      </div>
+    </header>
+
+    <section class="grid">
+      <!-- GAME -->
+      <div class="card" id="gameCard">
+        <div class="badgeRow">
+          <div class="badge"><span class="pillDot"></span><span id="rangeBadge">Range: 1–100</span></div>
+          <div class="badge" id="bestBadge">Best: —</div>
+        </div>
+
+        <div class="row">
+          <input id="guessInput" type="number" placeholder="Enter a guess..." />
+          <button class="primary" id="guessBtn">Guess</button>
+          <button class="danger" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="row">
+          <button id="hintBtn">Hint</button>
+          <button id="newNumberBtn" title="New secret number (keeps difficulty)">New Number</button>
+        </div>
+
+        <div class="status" id="statusBox">
+          <div class="left">
+            <div id="statusText"><strong>Ready.</strong> Make your first guess 👀</div>
+            <div class="mini">Press <strong>Enter</strong> to submit.</div>
+          </div>
+          <div class="right">
+            <span class="badge">Attempts: <b id="attempts">0</b></span>
+            <span class="badge">Hints: <b id="hintsLeft">2</b></span>
+          </div>
+        </div>
+
+        <div class="meterWrap">
+          <div class="meterLabel">
+            <span>Warm/Cold Meter</span>
+            <span class="mini" id="warmLabel">Start guessing</span>
+          </div>
+          <div class="meter"><div class="meterFill" id="meterFill"></div></div>
+        </div>
+
+        <div class="meta">
+          <div class="stat">
+            <div class="k">Mode</div>
+            <div class="v" id="modeText">Normal</div>
+          </div>
+          <div class="stat">
+            <div class="k">Current Range</div>
+            <div class="v" id="rangeText">1–100</div>
+          </div>
+          <div class="stat">
+            <div class="k">Last Guess</div>
+            <div class="v" id="lastGuess">—</div>
+          </div>
+          <div class="stat">
+            <div class="k">Best Score</div>
+            <div class="v" id="bestScore">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO -->
+      <div class="card">
+        <div class="list">
+          <div class="item">
+            <b>What makes it “interactive”</b>
+            <span>Buttons, input validation, dynamic feedback, animations, and saved progress.</span>
+          </div>
+          <div class="item">
+            <b>How best score works</b>
+            <span>Your lowest tries per difficulty is saved in your browser (localStorage).</span>
+          </div>
+          <div class="item">
+            <b>Hint types</b>
+            <span>Odd/even or a narrowed window around the secret number.</span>
+          </div>
+          <div class="item">
+            <b>Pro tip</b>
+            <span>Use the warm/cold meter to dial in fast.</span>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
+  <div class="confetti" id="confetti"></div>
+
   <script>
-    let secretNumber;
-    let attempts = 0;
-    let minRange = 1;
-    let maxRange = 100;
+    // -------- Difficulty setup --------
+    const DIFFICULTY = {
+      easy:   { label:"Easy",   min: 1, max: 50,  hints: 2 },
+      normal: { label:"Normal", min: 1, max: 100, hints: 2 },
+      hard:   { label:"Hard",   min: 1, max: 500, hints: 3 },
+    };
+
+    // -------- Elements --------
+    const difficultySelect = document.getElementById("difficultySelect");
+    const soundToggle = document.getElementById("soundToggle");
 
     const guessInput = document.getElementById("guessInput");
     const statusText = document.getElementById("statusText");
-    const attemptsText = document.getElementById("attempts");
-    const rangeHint = document.getElementById("rangeHint");
+    const attemptsEl = document.getElementById("attempts");
+    const hintsEl = document.getElementById("hintsLeft");
+    const rangeBadge = document.getElementById("rangeBadge");
+    const bestBadge = document.getElementById("bestBadge");
+
     const guessBtn = document.getElementById("guessBtn");
     const resetBtn = document.getElementById("resetBtn");
+    const hintBtn = document.getElementById("hintBtn");
+    const newNumberBtn = document.getElementById("newNumberBtn");
 
-    function startGame(){
-      secretNumber = Math.floor(Math.random() * 100) + 1;
-      attempts = 0;
-      minRange = 1;
-      maxRange = 100;
+    const gameCard = document.getElementById("gameCard");
+    const meterFill = document.getElementById("meterFill");
+    const warmLabel = document.getElementById("warmLabel");
 
-      attemptsText.textContent = attempts;
-      rangeHint.textContent = `Range: ${minRange}–${maxRange}`;
-      statusText.textContent = "Make your first guess 👀";
-      guessInput.value = "";
-      guessInput.focus();
-      guessBtn.disabled = false;
+    const modeText = document.getElementById("modeText");
+    const rangeText = document.getElementById("rangeText");
+    const lastGuessEl = document.getElementById("lastGuess");
+    const bestScoreEl = document.getElementById("bestScore");
+
+    const confetti = document.getElementById("confetti");
+
+    // -------- Game state --------
+    let mode = "normal";
+    let secret = 0;
+    let attempts = 0;
+    let minR = 1;
+    let maxR = 100;
+    let hintsLeft = 2;
+    let gameOver = false;
+    let lastDiff = null; // for warm/cold
+    let lastGuess = null;
+
+    // -------- Sound (no external files) --------
+    function beep(type){
+      if(!soundToggle.checked) return;
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+        let freq = 440, dur = 0.09;
+
+        if(type==="low")  { freq=320; dur=0.09; }
+        if(type==="high") { freq=620; dur=0.09; }
+        if(type==="win")  { freq=920; dur=0.14; }
+        if(type==="err")  { freq=200; dur=0.10; }
+        if(type==="hint") { freq=520; dur=0.10; }
+
+        o.frequency.value = freq;
+        g.gain.value = 0.06;
+
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + dur);
+        setTimeout(()=>ctx.close(), 220);
+      }catch(e){}
     }
 
-    function setMessage(msg){
-      statusText.textContent = msg;
+    // -------- localStorage best score --------
+    const bestKey = (m)=>`neon_guess_best_${m}`;
+    const getBest = (m)=> {
+      const v = localStorage.getItem(bestKey(m));
+      return v ? Number(v) : null;
+    };
+    const setBest = (m, tries)=> localStorage.setItem(bestKey(m), String(tries));
+
+    // -------- UI helpers --------
+    function animate(cls){
+      gameCard.classList.remove("shake","pop");
+      void gameCard.offsetWidth;
+      gameCard.classList.add(cls);
+    }
+    function setMsg(html){
+      statusText.innerHTML = html;
+    }
+    function randInt(min,max){
+      return Math.floor(Math.random()*(max-min+1))+min;
     }
 
-    function handleGuess(){
-      const guess = Number(guessInput.value);
+    function updateBestUI(){
+      const best = getBest(mode);
+      bestBadge.textContent = `Best: ${best ? best+" tries" : "—"}`;
+      bestScoreEl.textContent = best ? best+" tries" : "—";
+    }
 
-      if(!guessInput.value){
-        setMessage("Type a number first.");
-        return;
+    function updateUI(){
+      attemptsEl.textContent = attempts;
+      hintsEl.textContent = hintsLeft;
+      rangeBadge.textContent = `Range: ${minR}–${maxR}`;
+      rangeText.textContent = `${minR}–${maxR}`;
+      modeText.textContent = DIFFICULTY[mode].label;
+      lastGuessEl.textContent = lastGuess ?? "—";
+
+      guessBtn.disabled = gameOver;
+      hintBtn.disabled = gameOver || hintsLeft <= 0;
+
+      updateBestUI();
+    }
+
+    // -------- Warm/Cold meter --------
+    function setWarmCold(diff){
+      // diff is absolute difference between guess and secret
+      const cfg = DIFFICULTY[mode];
+      const maxDiff = cfg.max - cfg.min; // worst-case diff
+      const closeness = 1 - (diff / maxDiff); // 0..1
+      const pct = Math.max(0, Math.min(100, Math.round(closeness * 100)));
+      meterFill.style.width = pct + "%";
+
+      let label = "Cold 🧊";
+      if(pct >= 85) label = "HOT 🔥";
+      else if(pct >= 65) label = "Warm 😮‍💨";
+      else if(pct >= 45) label = "Cool 🙂";
+      warmLabel.textContent = label;
+    }
+
+    // -------- Confetti --------
+    function launchConfetti(){
+      confetti.innerHTML = "";
+      const colors = ["#7c3aed","#06b6d4","#22c55e","#f59e0b","#ef4444","#ffffff"];
+      const count = 90;
+
+      for(let i=0;i<count;i++){
+        const p = document.createElement("span");
+        const left = Math.random()*100;
+        const delay = Math.random()*0.15;
+        const size = 8 + Math.random()*8;
+        p.style.left = left + "vw";
+        p.style.top = "-20px";
+        p.style.width = size + "px";
+        p.style.height = (size*1.2) + "px";
+        p.style.background = colors[Math.floor(Math.random()*colors.length)];
+        p.style.animationDelay = delay + "s";
+        p.style.transform = `rotate(${Math.random()*360}deg)`;
+        confetti.appendChild(p);
       }
 
-      if(guess < 1 || guess > 100){
-        setMessage("Keep it between 1 and 100.");
+      setTimeout(()=> confetti.innerHTML = "", 1600);
+    }
+
+    // -------- Game setup --------
+    function applyDifficulty(newMode){
+      mode = newMode;
+      const cfg = DIFFICULTY[mode];
+      minR = cfg.min;
+      maxR = cfg.max;
+      hintsLeft = cfg.hints;
+
+      guessInput.min = String(cfg.min);
+      guessInput.max = String(cfg.max);
+      guessInput.placeholder = `Enter a guess (${cfg.min}-${cfg.max})`;
+
+      // Reset meter
+      meterFill.style.width = "0%";
+      warmLabel.textContent = "Start guessing";
+      lastDiff = null;
+      lastGuess = null;
+    }
+
+    function newSecret(){
+      const cfg = DIFFICULTY[mode];
+      secret = randInt(cfg.min, cfg.max);
+    }
+
+    function startGame(keepMode=true){
+      if(!keepMode) mode = "normal";
+      applyDifficulty(mode);
+      newSecret();
+      attempts = 0;
+      gameOver = false;
+
+      setMsg("<strong>Ready.</strong> Make your first guess 👀");
+      guessInput.value = "";
+      guessInput.focus();
+      updateUI();
+    }
+
+    // -------- Hints --------
+    function giveHint(){
+      if(gameOver || hintsLeft <= 0) return;
+      hintsLeft--;
+      beep("hint");
+      animate("pop");
+
+      const cfg = DIFFICULTY[mode];
+      const type = Math.random() < 0.5 ? "parity" : "window";
+
+      if(type === "parity"){
+        setMsg(`💡 Hint: It’s <strong>${secret % 2 === 0 ? "EVEN" : "ODD"}</strong>.`);
+      } else {
+        const spread = Math.max(6, Math.floor((cfg.max - cfg.min) * 0.08));
+        const lo = Math.max(cfg.min, secret - spread);
+        const hi = Math.min(cfg.max, secret + spread);
+        setMsg(`💡 Hint: It’s between <strong>${lo}</strong> and <strong>${hi}</strong>.`);
+      }
+      updateUI();
+    }
+
+    // -------- Guess handling --------
+    function handleGuess(){
+      if(gameOver) return;
+
+      const raw = guessInput.value;
+      const guess = Number(raw);
+      const cfg = DIFFICULTY[mode];
+
+      if(!raw){
+        beep("err"); animate("shake");
+        setMsg("Type a number first.");
+        return;
+      }
+      if(Number.isNaN(guess)){
+        beep("err"); animate("shake");
+        setMsg("That doesn’t look like a number.");
+        return;
+      }
+      if(guess < cfg.min || guess > cfg.max){
+        beep("err"); animate("shake");
+        setMsg(`Keep it between <strong>${cfg.min}</strong> and <strong>${cfg.max}</strong>.`);
         return;
       }
 
       attempts++;
-      attemptsText.textContent = attempts;
+      lastGuess = guess;
 
-      if(guess === secretNumber){
-        setMessage(`✅ Correct! The number was ${secretNumber}. You got it in ${attempts} tries.`);
-        guessBtn.disabled = true;
+      const diff = Math.abs(guess - secret);
+      setWarmCold(diff);
+
+      if(guess === secret){
+        beep("win");
+        animate("pop");
+        launchConfetti();
+        gameOver = true;
+
+        const best = getBest(mode);
+        if(!best || attempts < best){
+          setBest(mode, attempts);
+          setMsg(`✅ <strong>You got it!</strong> The number was <strong>${secret}</strong>. <strong>${attempts}</strong> tries. 🏆 New best!`);
+        } else {
+          setMsg(`✅ <strong>You got it!</strong> The number was <strong>${secret}</strong>. <strong>${attempts}</strong> tries.`);
+        }
+        updateUI();
         return;
       }
 
-      if(guess < secretNumber){
-        setMessage("Too low ⬇️ Try again.");
-        if(guess >= minRange) minRange = guess + 1;
+      // Too low / too high + range narrow
+      if(guess < secret){
+        beep("low"); animate("shake");
+        setMsg("Too low ⬇️ Try again.");
+        minR = Math.max(minR, guess + 1);
       } else {
-        setMessage("Too high ⬆️ Try again.");
-        if(guess <= maxRange) maxRange = guess - 1;
+        beep("high"); animate("shake");
+        setMsg("Too high ⬆️ Try again.");
+        maxR = Math.min(maxR, guess - 1);
       }
 
-      rangeHint.textContent = `Range: ${minRange}–${maxRange}`;
+      // reset range if somehow invalid
+      if(minR > maxR){
+        minR = cfg.min;
+        maxR = cfg.max;
+      }
+
       guessInput.value = "";
       guessInput.focus();
+      updateUI();
     }
 
+    // -------- Events --------
     guessBtn.addEventListener("click", handleGuess);
+    guessInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleGuess(); });
 
-    guessInput.addEventListener("keydown", (e) => {
-      if(e.key === "Enter") handleGuess();
+    resetBtn.addEventListener("click", ()=> startGame(true));
+    newNumberBtn.addEventListener("click", ()=> startGame(true));
+    hintBtn.addEventListener("click", giveHint);
+
+    difficultySelect.addEventListener("change", ()=>{
+      mode = difficultySelect.value;
+      startGame(true);
     });
 
-    resetBtn.addEventListener("click", startGame);
-
-    startGame();
+    // init
+    difficultySelect.value = mode;
+    startGame(true);
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guess the Number — Neon</title>
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#0a0f1f;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.12);
+      --text:#f2f4ff;
+      --muted: rgba(242,244,255,.68);
+
+      --a:#7c3aed; /* purple */
+      --b:#22c55e; /* green */
+      --c:#06b6d4; /* cyan */
+      --d:#f59e0b; /* amber */
+      --e:#ef4444; /* red */
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 10% 20%, rgba(124,58,237,.25), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, rgba(6,182,212,.18), transparent 55%),
+        radial-gradient(900px 700px at 70% 85%, rgba(34,197,94,.14), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      overflow:hidden;
+    }
+
+    /* animated glow blobs */
+    .blob{
+      position:fixed;
+      width:520px; height:520px;
+      filter: blur(60px);
+      opacity:.35;
+      z-index:-1;
+      animation: float 10s ease-in-out infinite;
+    }
+    .blob.p1{ left:-120px; top:-120px; background: radial-gradient(circle, rgba(124,58,237,.9), transparent 60%); }
+    .blob.p2{ right:-140px; top:60px; background: radial-gradient(circle, rgba(6,182,212,.85), transparent 60%); animation-delay:-3s; }
+    .blob.p3{ right:10%; bottom:-200px; background: radial-gradient(circle, rgba(34,197,94,.8), transparent 60%); animation-delay:-6s; }
+    @keyframes float{
+      0%,100%{ transform: translate(0,0) scale(1); }
+      50%{ transform: translate(30px, -20px) scale(1.05); }
+    }
+
+    .wrap{
+      width:min(900px, 96vw);
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .title h1{
+      margin:0;
+      font-size: clamp(26px, 3.2vw, 36px);
+      letter-spacing:.2px;
+      line-height:1.1;
+    }
+    .title p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.4;
+      max-width: 560px;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      color: var(--muted);
+      font-size:14px;
+    }
+
+    select{
+      border:none;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .switch{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+      cursor:pointer;
+    }
+    .switch input{
+      width:42px; height:24px;
+      appearance:none;
+      background: rgba(255,255,255,.12);
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      position:relative;
+      outline:none;
+      cursor:pointer;
+      transition: .2s ease;
+    }
+    .switch input:checked{
+      background: linear-gradient(90deg, rgba(124,58,237,.9), rgba(6,182,212,.8));
+      border-color: rgba(255,255,255,.2);
+    }
+    .switch input::after{
+      content:"";
+      width:18px; height:18px;
+      background:#fff;
+      border-radius:50%;
+      position:absolute;
+      top:2px; left:2px;
+      transition:.2s ease;
+    }
+    .switch input:checked::after{
+      left:21px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+      .toolbar{ justify-content:flex-start; }
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      padding: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 70px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(500px 200px at 30% 0%, rgba(124,58,237,.18), transparent 60%),
+                  radial-gradient(420px 240px at 90% 20%, rgba(6,182,212,.14), transparent 60%);
+      pointer-events:none;
+    }
+    .card > *{ position:relative; }
+
+    .badgeRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      color: var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .pillDot{
+      width:9px; height:9px;
+      border-radius:50%;
+      background: linear-gradient(90deg, var(--a), var(--c));
+      box-shadow: 0 0 16px rgba(124,58,237,.6);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    input[type="number"]{
+      flex:1;
+      min-width:220px;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      font-size:16px;
+      outline:none;
+      transition:.2s ease;
+    }
+    input[type="number"]:focus{
+      border-color: rgba(6,182,212,.6);
+      box-shadow: 0 0 0 4px rgba(6,182,212,.15);
+    }
+
+    button{
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-size:15px;
+      cursor:pointer;
+      transition: transform .08s ease, box-shadow .2s ease, background .2s ease, opacity .15s ease;
+    }
+    button:hover{
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transform: translateY(-1px);
+    }
+    button:active{ transform: translateY(0); }
+    button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+    .primary{
+      border:none;
+      background: linear-gradient(90deg, rgba(124,58,237,.95), rgba(6,182,212,.9));
+      box-shadow: 0 12px 36px rgba(124,58,237,.22);
+    }
+    .danger{
+      border:none;
+      background: linear-gradient(90deg, rgba(239,68,68,.95), rgba(245,158,11,.9));
+      box-shadow: 0 12px 36px rgba(245,158,11,.18);
+    }
+
+    .status{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      min-height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .status strong{ color:#fff; }
+    .status .left{
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .status .right{
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+
+    .mini{
+      font-size:13px;
+      color: var(--muted);
+    }
+
+    .meta{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 560px){
+      .meta{ grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+    }
+    .stat .k{ font-size:12px; color: var(--muted); }
+    .stat .v{ font-size:16px; margin-top:4px; font-weight:700; }
+
+    /* warm/cold meter */
+    .meterWrap{ margin-top:12px; }
+    .meterLabel{
+      display:flex; justify-content:space-between; align-items:center;
+      color: var(--muted);
+      font-size:13px;
+      margin-bottom:8px;
+    }
+    .meter{
+      height:12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+    }
+    .meterFill{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(6,182,212,.95), rgba(34,197,94,.9), rgba(245,158,11,.95), rgba(239,68,68,.95));
+      transition: width .25s ease;
+    }
+
+    /* right panel list */
+    .list{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .item{
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+    }
+    .item b{ display:block; margin-bottom:4px; }
+    .item span{ color: var(--muted); font-size:13px; }
+
+    /* shake/pop */
+    .shake{ animation: shake .25s linear; }
+    @keyframes shake{
+      0%{ transform: translateX(0); }
+      25%{ transform: translateX(-7px); }
+      50%{ transform: translateX(7px); }
+      75%{ transform: translateX(-4px); }
+      100%{ transform: translateX(0); }
+    }
+    .pop{ animation: pop .22s ease; }
+    @keyframes pop{
+      0%{ transform: scale(.98); }
+      70%{ transform: scale(1.02); }
+      100%{ transform: scale(1); }
+    }
+
+    /* confetti */
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:10;
+    }
+    .confetti span{
+      position:absolute;
+      width:10px; height:14px;
+      border-radius:3px;
+      opacity:.95;
+      animation: fall 1.35s linear forwards;
+    }
+    @keyframes fall{
+      0%{ transform: translateY(-20px) rotate(0deg); }
+      100%{ transform: translateY(calc(100vh + 40px)) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob p1"></div>
+  <div class="blob p2"></div>
+  <div class="blob p3"></div>
+
+  <main class="wrap">
+    <header>
+      <div class="title">
+        <h1>Guess the Number — Neon Edition</h1>
+        <p>Pick a difficulty, guess the secret number, use limited hints, and beat your best score (saved per mode).</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="chip">
+          <span>Difficulty</span>
+          <select id="difficultySelect" aria-label="Difficulty">
+            <option value="easy">Easy (1–50)</option>
+            <option value="normal" selected>Normal (1–100)</option>
+            <option value="hard">Hard (1–500)</option>
+          </select>
+        </div>
+
+        <label class="chip switch" title="Toggle sound effects">
+          <input id="soundToggle" type="checkbox" checked />
+          <span>Sound</span>
+        </label>
+      </div>
+    </header>
+
+    <section class="grid">
+      <!-- GAME -->
+      <div class="card" id="gameCard">
+        <div class="badgeRow">
+          <div class="badge"><span class="pillDot"></span><span id="rangeBadge">Range: 1–100</span></div>
+          <div class="badge" id="bestBadge">Best: —</div>
+        </div>
+
+        <div class="row">
+          <input id="guessInput" type="number" placeholder="Enter a guess..." />
+          <button class="primary" id="guessBtn">Guess</button>
+          <button class="danger" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="row">
+          <button id="hintBtn">Hint</button>
+          <button id="newNumberBtn" title="New secret number (keeps difficulty)">New Number</button>
+        </div>
+
+        <div class="status" id="statusBox">
+          <div class="left">
+            <div id="statusText"><strong>Ready.</strong> Make your first guess 👀</div>
+            <div class="mini">Press <strong>Enter</strong> to submit.</div>
+          </div>
+          <div class="right">
+            <span class="badge">Attempts: <b id="attempts">0</b></span>
+            <span class="badge">Hints: <b id="hintsLeft">2</b></span>
+          </div>
+        </div>
+
+        <div class="meterWrap">
+          <div class="meterLabel">
+            <span>Warm/Cold Meter</span>
+            <span class="mini" id="warmLabel">Start guessing</span>
+          </div>
+          <div class="meter"><div class="meterFill" id="meterFill"></div></div>
+        </div>
+
+        <div class="meta">
+          <div class="stat">
+            <div class="k">Mode</div>
+            <div class="v" id="modeText">Normal</div>
+          </div>
+          <div class="stat">
+            <div class="k">Current Range</div>
+            <div class="v" id="rangeText">1–100</div>
+          </div>
+          <div class="stat">
+            <div class="k">Last Guess</div>
+            <div class="v" id="lastGuess">—</div>
+          </div>
+          <div class="stat">
+            <div class="k">Best Score</div>
+            <div class="v" id="bestScore">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO -->
+      <div class="card">
+        <div class="list">
+          <div class="item">
+            <b>What makes it “interactive”</b>
+            <span>Buttons, input validation, dynamic feedback, animations, and saved progress.</span>
+          </div>
+          <div class="item">
+            <b>How best score works</b>
+            <span>Your lowest tries per difficulty is saved in your browser (localStorage).</span>
+          </div>
+          <div class="item">
+            <b>Hint types</b>
+            <span>Odd/even or a narrowed window around the secret number.</span>
+          </div>
+          <div class="item">
+            <b>Pro tip</b>
+            <span>Use the warm/cold meter to dial in fast.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+    // -------- Difficulty setup --------
+    const DIFFICULTY = {
+      easy:   { label:"Easy",   min: 1, max: 50,  hints: 2 },
+      normal: { label:"Normal", min: 1, max: 100, hints: 2 },
+      hard:   { label:"Hard",   min: 1, max: 500, hints: 3 },
+    };
+
+    // -------- Elements --------
+    const difficultySelect = document.getElementById("difficultySelect");
+    const soundToggle = document.getElementById("soundToggle");
+
+    const guessInput = document.getElementById("guessInput");
+    const statusText = document.getElementById("statusText");
+    const attemptsEl = document.getElementById("attempts");
+    const hintsEl = document.getElementById("hintsLeft");
+    const rangeBadge = document.getElementById("rangeBadge");
+    const bestBadge = document.getElementById("bestBadge");
+
+    const guessBtn = document.getElementById("guessBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const hintBtn = document.getElementById("hintBtn");
+    const newNumberBtn = document.getElementById("newNumberBtn");
+
+    const gameCard = document.getElementById("gameCard");
+    const meterFill = document.getElementById("meterFill");
+    const warmLabel = document.getElementById("warmLabel");
+
+    const modeText = document.getElementById("modeText");
+    const rangeText = document.getElementById("rangeText");
+    const lastGuessEl = document.getElementById("lastGuess");
+    const bestScoreEl = document.getElementById("bestScore");
+
+    const confetti = document.getElementById("confetti");
+
+    // -------- Game state --------
+    let mode = "normal";
+    let secret = 0;
+    let attempts = 0;
+    let minR = 1;
+    let maxR = 100;
+    let hintsLeft = 2;
+    let gameOver = false;
+    let lastDiff = null; // for warm/cold
+    let lastGuess = null;
+
+    // -------- Sound (no external files) --------
+    function beep(type){
+      if(!soundToggle.checked) return;
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+        let freq = 440, dur = 0.09;
+
+        if(type==="low")  { freq=320; dur=0.09; }
+        if(type==="high") { freq=620; dur=0.09; }
+        if(type==="win")  { freq=920; dur=0.14; }
+        if(type==="err")  { freq=200; dur=0.10; }
+        if(type==="hint") { freq=520; dur=0.10; }
+
+        o.frequency.value = freq;
+        g.gain.value = 0.06;
+
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + dur);
+        setTimeout(()=>ctx.close(), 220);
+      }catch(e){}
+    }
+
+    // -------- localStorage best score --------
+    const bestKey = (m)=>`neon_guess_best_${m}`;
+    const getBest = (m)=> {
+      const v = localStorage.getItem(bestKey(m));
+      return v ? Number(v) : null;
+    };
+    const setBest = (m, tries)=> localStorage.setItem(bestKey(m), String(tries));
+
+    // -------- UI helpers --------
+    function animate(cls){
+      gameCard.classList.remove("shake","pop");
+      void gameCard.offsetWidth;
+      gameCard.classList.add(cls);
+    }
+    function setMsg(html){
+      statusText.innerHTML = html;
+    }
+    function randInt(min,max){
+      return Math.floor(Math.random()*(max-min+1))+min;
+    }
+
+    function updateBestUI(){
+      const best = getBest(mode);
+      bestBadge.textContent = `Best: ${best ? best+" tries" : "—"}`;
+      bestScoreEl.textContent = best ? best+" tries" : "—";
+    }
+
+    function updateUI(){
+      attemptsEl.textContent = attempts;
+      hintsEl.textContent = hintsLeft;
+      rangeBadge.textContent = `Range: ${minR}–${maxR}`;
+      rangeText.textContent = `${minR}–${maxR}`;
+      modeText.textContent = DIFFICULTY[mode].label;
+      lastGuessEl.textContent = lastGuess ?? "—";
+
+      guessBtn.disabled = gameOver;
+      hintBtn.disabled = gameOver || hintsLeft <= 0;
+
+      updateBestUI();
+    }
+
+    // -------- Warm/Cold meter --------
+    function setWarmCold(diff){
+      // diff is absolute difference between guess and secret
+      const cfg = DIFFICULTY[mode];
+      const maxDiff = cfg.max - cfg.min; // worst-case diff
+      const closeness = 1 - (diff / maxDiff); // 0..1
+      const pct = Math.max(0, Math.min(100, Math.round(closeness * 100)));
+      meterFill.style.width = pct + "%";
+
+      let label = "Cold 🧊";
+      if(pct >= 85) label = "HOT 🔥";
+      else if(pct >= 65) label = "Warm 😮‍💨";
+      else if(pct >= 45) label = "Cool 🙂";
+      warmLabel.textContent = label;
+    }
+
+    // -------- Confetti --------
+    function launchConfetti(){
+      confetti.innerHTML = "";
+      const colors = ["#7c3aed","#06b6d4","#22c55e","#f59e0b","#ef4444","#ffffff"];
+      const count = 90;
+
+      for(let i=0;i<count;i++){
+        const p = document.createElement("span");
+        const left = Math.random()*100;
+        const delay = Math.random()*0.15;
+        const size = 8 + Math.random()*8;
+        p.style.left = left + "vw";
+        p.style.top = "-20px";
+        p.style.width = size + "px";
+        p.style.height = (size*1.2) + "px";
+        p.style.background = colors[Math.floor(Math.random()*colors.length)];
+        p.style.animationDelay = delay + "s";
+        p.style.transform = `rotate(${Math.random()*360}deg)`;
+        confetti.appendChild(p);
+      }
+
+      setTimeout(()=> confetti.innerHTML = "", 1600);
+    }
+
+    // -------- Game setup --------
+    function applyDifficulty(newMode){
+      mode = newMode;
+      const cfg = DIFFICULTY[mode];
+      minR = cfg.min;
+      maxR = cfg.max;
+      hintsLeft = cfg.hints;
+
+      guessInput.min = String(cfg.min);
+      guessInput.max = String(cfg.max);
+      guessInput.placeholder = `Enter a guess (${cfg.min}-${cfg.max})`;
+
+      // Reset meter
+      meterFill.style.width = "0%";
+      warmLabel.textContent = "Start guessing";
+      lastDiff = null;
+      lastGuess = null;
+    }
+
+    function newSecret(){
+      const cfg = DIFFICULTY[mode];
+      secret = randInt(cfg.min, cfg.max);
+    }
+
+    function startGame(keepMode=true){
+      if(!keepMode) mode = "normal";
+      applyDifficulty(mode);
+      newSecret();
+      attempts = 0;
+      gameOver = false;
+
+      setMsg("<strong>Ready.</strong> Make your first guess 👀");
+      guessInput.value = "";
+      guessInput.focus();
+      updateUI();
+    }
+
+    // -------- Hints --------
+    function giveHint(){
+      if(gameOver || hintsLeft <= 0) return;
+      hintsLeft--;
+      beep("hint");
+      animate("pop");
+
+      const cfg = DIFFICULTY[mode];
+      const type = Math.random() < 0.5 ? "parity" : "window";
+
+      if(type === "parity"){
+        setMsg(`💡 Hint: It’s <strong>${secret % 2 === 0 ? "EVEN" : "ODD"}</strong>.`);
+      } else {
+        const spread = Math.max(6, Math.floor((cfg.max - cfg.min) * 0.08));
+        const lo = Math.max(cfg.min, secret - spread);
+        const hi = Math.min(cfg.max, secret + spread);
+        setMsg(`💡 Hint: It’s between <strong>${lo}</strong> and <strong>${hi}</strong>.`);
+      }
+      updateUI();
+    }
+
+    // -------- Guess handling --------
+    function handleGuess(){
+      if(gameOver) return;
+
+      const raw = guessInput.value;
+      const guess = Number(raw);
+      const cfg = DIFFICULTY[mode];
+
+      if(!raw){
+        beep("err"); animate("shake");
+        setMsg("Type a number first.");
+        return;
+      }
+      if(Number.isNaN(guess)){
+        beep("err"); animate("shake");
+        setMsg("That doesn’t look like a number.");
+        return;
+      }
+      if(guess < cfg.min || guess > cfg.max){
+        beep("err"); animate("shake");
+        setMsg(`Keep it between <strong>${cfg.min}</strong> and <strong>${cfg.max}</strong>.`);
+        return;
+      }
+
+      attempts++;
+      lastGuess = guess;
+
+      const diff = Math.abs(guess - secret);
+      setWarmCold(diff);
+
+      if(guess === secret){
+        beep("win");
+        animate("pop");
+        launchConfetti();
+        gameOver = true;
+
+        const best = getBest(mode);
+        if(!best || attempts < best){
+          setBest(mode, attempts);
+          setMsg(`✅ <strong>You got it!</strong> The number was <strong>${secret}</strong>. <strong>${attempts}</strong> tries. 🏆 New best!`);
+        } else {
+          setMsg(`✅ <strong>You got it!</strong> The number was <strong>${secret}</strong>. <strong>${attempts}</strong> tries.`);
+        }
+        updateUI();
+        return;
+      }
+
+      // Too low / too high + range narrow
+      if(guess < secret){
+        beep("low"); animate("shake");
+        setMsg("Too low ⬇️ Try again.");
+        minR = Math.max(minR, guess + 1);
+      } else {
+        beep("high"); animate("shake");
+        setMsg("Too high ⬆️ Try again.");
+        maxR = Math.min(maxR, guess - 1);
+      }
+
+      // reset range if somehow invalid
+      if(minR > maxR){
+        minR = cfg.min;
+        maxR = cfg.max;
+      }
+
+      guessInput.value = "";
+      guessInput.focus();
+      updateUI();
+    }
+
+    // -------- Events --------
+    guessBtn.addEventListener("click", handleGuess);
+    guessInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleGuess(); });
+
+    resetBtn.addEventListener("click", ()=> startGame(true));
+    newNumberBtn.addEventListener("click", ()=> startGame(true));
+    hintBtn.addEventListener("click", giveHint);
+
+    difficultySelect.addEventListener("change", ()=>{
+      mode = difficultySelect.value;
+      startGame(true);
+    });
+
+    // init
+    difficultySelect.value = mode;
+    startGame(true);
+  </script>
+</body>
+</html>
+
