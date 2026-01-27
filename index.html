@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guess the Number</title>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f4f4;
+      margin:0;
+      padding:0;
+      display:flex;
+      min-height:100vh;
+      align-items:center;
+      justify-content:center;
+    }
+    .card{
+      width:min(520px, 92vw);
+      background:#fff;
+      padding:28px;
+      border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+    h1{ margin:0 0 8px; color:#222; }
+    p{ margin:0 0 16px; color:#555; line-height:1.4; }
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    input{
+      flex:1;
+      min-width:160px;
+      padding:12px 14px;
+      border:1px solid #ddd;
+      border-radius:10px;
+      font-size:16px;
+      outline:none;
+    }
+    button{
+      padding:12px 14px;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .btn-primary{ background:#111; color:#fff; }
+    .btn-secondary{ background:#e9e9e9; color:#111; }
+    .status{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:10px;
+      background:#f8f8f8;
+      color:#222;
+      min-height:24px;
+    }
+    .meta{
+      margin-top:10px;
+      color:#666;
+      font-size:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .hint{
+      font-weight:bold;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Guess the Number</h1>
+    <p>I’m thinking of a number between <strong>1</strong> and <strong>100</strong>. Try to guess it.</p>
+
+    <div class="row">
+      <input id="guessInput" type="number" min="1" max="100" placeholder="Enter a number (1-100)" />
+      <button class="btn-primary" id="guessBtn">Guess</button>
+      <button class="btn-secondary" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="status" id="statusText">Make your first guess 👀</div>
+
+    <div class="meta">
+      <div>Attempts: <span id="attempts">0</span></div>
+      <div class="hint" id="rangeHint">Range: 1–100</div>
+    </div>
+  </main>
+
+  <script>
+    let secretNumber;
+    let attempts = 0;
+    let minRange = 1;
+    let maxRange = 100;
+
+    const guessInput = document.getElementById("guessInput");
+    const statusText = document.getElementById("statusText");
+    const attemptsText = document.getElementById("attempts");
+    const rangeHint = document.getElementById("rangeHint");
+    const guessBtn = document.getElementById("guessBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function startGame(){
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      minRange = 1;
+      maxRange = 100;
+
+      attemptsText.textContent = attempts;
+      rangeHint.textContent = `Range: ${minRange}–${maxRange}`;
+      statusText.textContent = "Make your first guess 👀";
+      guessInput.value = "";
+      guessInput.focus();
+      guessBtn.disabled = false;
+    }
+
+    function setMessage(msg){
+      statusText.textContent = msg;
+    }
+
+    function handleGuess(){
+      const guess = Number(guessInput.value);
+
+      if(!guessInput.value){
+        setMessage("Type a number first.");
+        return;
+      }
+
+      if(guess < 1 || guess > 100){
+        setMessage("Keep it between 1 and 100.");
+        return;
+      }
+
+      attempts++;
+      attemptsText.textContent = attempts;
+
+      if(guess === secretNumber){
+        setMessage(`✅ Correct! The number was ${secretNumber}. You got it in ${attempts} tries.`);
+        guessBtn.disabled = true;
+        return;
+      }
+
+      if(guess < secretNumber){
+        setMessage("Too low ⬇️ Try again.");
+        if(guess >= minRange) minRange = guess + 1;
+      } else {
+        setMessage("Too high ⬆️ Try again.");
+        if(guess <= maxRange) maxRange = guess - 1;
+      }
+
+      rangeHint.textContent = `Range: ${minRange}–${maxRange}`;
+      guessInput.value = "";
+      guessInput.focus();
+    }
+
+    guessBtn.addEventListener("click", handleGuess);
+
+    guessInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") handleGuess();
+    });
+
+    resetBtn.addEventListener("click", startGame);
+
+    startGame();
+  </script>
+</body>
+</html>
