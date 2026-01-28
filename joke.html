@@ -23,40 +23,65 @@
     <h1 style="margin-top:10px;">Joke of the Day</h1>
     <p>Click the button for a random joke. You can copy it too.</p>
 
-    <div class="row">
-      <button class="btn-primary" id="jokeBtn">Tell me a joke</button>
-      <button class="btn-secondary" id="copyBtn">Copy</button>
-    </div>
+   <div class="row">
+  <button class="btn-primary" id="jokeBtn">Tell me a joke</button>
+  <button class="btn-secondary" id="answerBtn">Show Answer</button>
+  <button class="btn-secondary" id="copyBtn">Copy</button>
+  </div>
 
     <div class="status" id="jokeText">Ready when you are 😄</div>
   </main>
 
-  <script>
-    const jokes = [
-      "Why don’t programmers like nature? Too many bugs.",
-      "I told my computer I needed a break… it said: 'No problem, I’ll go to sleep.'",
-      "Why did the developer go broke? Because they used up all their cache.",
-      "Debugging: being the detective in a crime movie where you are also the criminal.",
-      "My code works… I have no idea why.",
-      "Why do Java developers wear glasses? Because they don’t C#."
-    ];
+ <script>
+  const jokes = [
+    { setup: "Why don’t programmers like nature?", punchline: "Too many bugs." },
+    { setup: "Why do programmers prefer dark mode?", punchline: "Because light attracts bugs." },
+    { setup: "Why do Java developers wear glasses?", punchline: "Because they don’t C#." },
+    { setup: "Why was the JavaScript developer sad?", punchline: "Because he didn’t Node how to Express himself." },
+    { setup: "Why did the developer go broke?", punchline: "Because they used up all their cache." },
+    { setup: "Why did the computer show up at work late?", punchline: "It had a hard drive." },
+    { setup: "Why did the function break up with the loop?", punchline: "It felt like it was going nowhere." },
+    { setup: "Why don’t programmers like to go outside?", punchline: "The sunlight causes glare on their screens." },
+    { setup: "Why did the scarecrow become a successful developer?", punchline: "He was outstanding in his field." },
+    { setup: "Why did the computer go to the doctor?", punchline: "Because it caught a virus." },
+    { setup: "Why did the keyboard break up with the mouse?", punchline: "It felt like it was being clicked with someone else." },
+    { setup: "Why was the math book sad?", punchline: "It had too many problems." },
+    { setup: "Why don’t scientists trust atoms?", punchline: "Because they make up everything." },
+    { setup: "Why did the cookie go to the doctor?", punchline: "Because it felt crummy." },
+    { setup: "Why did the student eat his homework?", punchline: "Because the teacher said it was a piece of cake." },
+    { setup: "Why did the computer go to space?", punchline: "To visit the cloud." },
+    { setup: "Why did the phone go to therapy?", punchline: "It lost all its contacts." },
+    { setup: "Why was the computer cold?", punchline: "It forgot to close its Windows." },
+    { setup: "Why did the robot go on vacation?", punchline: "It needed to recharge." },
+    { setup: "Why did the server break up with the database?", punchline: "It couldn’t handle the connection." }
+  ];
 
-    const jokeText = document.getElementById("jokeText");
+  const jokeText = document.getElementById("jokeText");
+  let currentJoke = null;
 
-    document.getElementById("jokeBtn").addEventListener("click", () => {
-      jokeText.textContent = jokes[Math.floor(Math.random() * jokes.length)];
-    });
+  document.getElementById("jokeBtn").addEventListener("click", () => {
+    currentJoke = jokes[Math.floor(Math.random() * jokes.length)];
+    jokeText.textContent = currentJoke.setup;
+  });
 
-    document.getElementById("copyBtn").addEventListener("click", async () => {
-      try{
-        await navigator.clipboard.writeText(jokeText.textContent);
-        const old = jokeText.textContent;
-        jokeText.textContent = "✅ Copied!";
-        setTimeout(() => jokeText.textContent = old, 800);
-      } catch {
-        jokeText.textContent = "Copy not supported in this browser.";
-      }
-    });
-  </script>
+  document.getElementById("answerBtn").addEventListener("click", () => {
+    if (!currentJoke) {
+      jokeText.textContent = "Click 'Tell me a joke' first!";
+      return;
+    }
+    jokeText.textContent = currentJoke.punchline;
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(jokeText.textContent);
+      const old = jokeText.textContent;
+      jokeText.textContent = "✅ Copied!";
+      setTimeout(() => jokeText.textContent = old, 800);
+    } catch {
+      jokeText.textContent = "Copy not supported in this browser.";
+    }
+  });
+</script>
 </body>
 </html>
