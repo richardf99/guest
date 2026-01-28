@@ -5,235 +5,316 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Guess the Number</title>
   <style>
-    :root{--bg:#f4f4f4;--card:#fff;--text:#1b1b1b;--muted:#666;--line:#e6e6e6;--btn:#111;--btn2:#e9e9e9;--soft:#fafafa;}
-    *{box-sizing:border-box;}
-    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);}
-    header{background:var(--card);border-bottom:1px solid var(--line);}
-    .nav{max-width:900px;margin:0 auto;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-    .logo{font-weight:800;}
-    .wrap{max-width:900px;margin:0 auto;padding:22px 18px 60px;}
-    .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
-    h1{margin:0 0 8px;}
-    p{margin:0 0 14px;color:var(--muted);line-height:1.5;}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
-    input, select{padding:11px 12px;border-radius:12px;border:1px solid var(--line);font-size:14px;outline:none;background:#fff;min-width:160px;}
-    .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:15px;user-select:none;transition:transform .08s ease;}
-    .btn:active{transform:scale(.98);}
-    .btn-primary{background:var(--btn);color:#fff;}
-    .btn-secondary{background:var(--btn2);color:#111;}
-    .btn-ghost{background:#fff;border:1px solid var(--line);color:#111;}
-    .status{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--soft);border:1px solid var(--line);min-height:44px;display:flex;align-items:center;}
-    .meta{margin-top:10px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;font-size:14px;}
-    a{color:inherit;text-decoration:none;}
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f4f4;
+      margin:0;
+      padding:0;
+      display:flex;
+      min-height:100vh;
+      align-items:center;
+      justify-content:center;
+    }
+    .card{
+      width:min(620px, 92vw);
+      background:#fff;
+      padding:28px;
+      border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+    h1{ margin:0 0 8px; color:#222; }
+    p{ margin:0 0 16px; color:#555; line-height:1.4; }
+
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    input, select{
+      flex:1;
+      min-width:170px;
+      padding:12px 14px;
+      border:1px solid #ddd;
+      border-radius:10px;
+      font-size:16px;
+      outline:none;
+      background:#fff;
+    }
+    button, a.btn-link{
+      padding:12px 14px;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn-primary{ background:#111; color:#fff; }
+    .btn-secondary{ background:#e9e9e9; color:#111; }
+    .btn-ghost{ background:#fff; color:#111; border:1px solid #ddd; }
+
+    .status{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:10px;
+      background:#f8f8f8;
+      color:#222;
+      min-height:24px;
+    }
+    .meta{
+      margin-top:10px;
+      color:#666;
+      font-size:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .hint{
+      font-weight:bold;
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:14px;
+      color:#666;
+    }
+    .toggle input{ transform:scale(1.1); }
   </style>
 </head>
 <body>
-<header>
-  <div class="nav">
-    <div class="logo">Guess the Number</div>
-    <a class="btn btn-ghost" href="index.html">← Home</a>
-  </div>
-</header>
+  <main class="card">
+    <div class="topbar">
+      <a class="btn-link btn-ghost" href="index.html">← Home</a>
+      <label class="toggle" title="Toggle sound effects">
+        <input id="soundToggle" type="checkbox" checked>
+        Sound
+      </label>
+    </div>
 
-<main class="wrap">
-  <section class="panel">
-    <h1>Play</h1>
-    <p>Pick a difficulty, guess the number, use hints if you need them, and try to beat your best score.</p>
+    <h1>Guess the Number</h1>
+    <p>I’m thinking of a number in the selected range. Try to guess it.</p>
 
     <div class="row">
-      <label>Difficulty:</label>
       <select id="difficulty">
         <option value="easy">Easy (1–50)</option>
         <option value="normal" selected>Normal (1–100)</option>
         <option value="hard">Hard (1–500)</option>
       </select>
-      <button class="btn btn-secondary" id="newGameBtn">New Game</button>
-      <label class="row" style="gap:8px;margin:0;">
-        <input id="soundToggle" type="checkbox" checked style="min-width:auto;transform:scale(1.1);">
-        <span style="color:var(--muted);font-weight:700;">Sound</span>
-      </label>
+      <button class="btn-secondary" id="newGameBtn">New Game</button>
+      <button class="btn-ghost" id="hintBtn">Hint</button>
     </div>
 
     <div class="row">
-      <input id="guessInput" type="number" placeholder="Enter guess..." />
-      <button class="btn btn-primary" id="guessBtn">Guess</button>
-      <button class="btn btn-ghost" id="hintBtn">Hint</button>
+      <input id="guessInput" type="number" placeholder="Enter a number..." />
+      <button class="btn-primary" id="guessBtn">Guess</button>
+      <button class="btn-secondary" id="resetBtn">Reset</button>
     </div>
 
-    <div class="status" id="statusText">Press “New Game” to begin.</div>
+    <div class="status" id="statusText">Starting…</div>
 
     <div class="meta">
-      <div>Attempts: <strong id="attempts">0</strong></div>
-      <div>Hints left: <strong id="hintsLeft">0</strong></div>
-      <div>Best score: <strong id="bestScore">—</strong></div>
+      <div>Attempts: <span id="attempts">0</span></div>
+      <div>Hints left: <span id="hintsLeft">0</span></div>
+      <div>Best: <span class="hint" id="bestScore">—</span></div>
+      <div class="hint" id="rangeHint">Range: —</div>
     </div>
-  </section>
-</main>
+  </main>
 
-<script>
-  const DIFF = {
-    easy:   { min: 1, max: 50,  hints: 2 },
-    normal: { min: 1, max: 100, hints: 2 },
-    hard:   { min: 1, max: 500, hints: 3 },
-  };
+  <script>
+    const DIFF = {
+      easy:   { min: 1, max: 50,  hints: 2 },
+      normal: { min: 1, max: 100, hints: 2 },
+      hard:   { min: 1, max: 500, hints: 3 },
+    };
 
-  const difficultyEl = document.getElementById("difficulty");
-  const soundToggle = document.getElementById("soundToggle");
-  const guessInput = document.getElementById("guessInput");
-  const guessBtn = document.getElementById("guessBtn");
-  const newGameBtn = document.getElementById("newGameBtn");
-  const hintBtn = document.getElementById("hintBtn");
+    let secretNumber;
+    let attempts = 0;
+    let minRange = 1;
+    let maxRange = 100;
+    let hintsLeft = 0;
+    let gameOver = false;
+    let mode = "normal";
 
-  const statusText = document.getElementById("statusText");
-  const attemptsEl = document.getElementById("attempts");
-  const hintsLeftEl = document.getElementById("hintsLeft");
-  const bestScoreEl = document.getElementById("bestScore");
+    const difficultyEl = document.getElementById("difficulty");
+    const guessInput = document.getElementById("guessInput");
+    const statusText = document.getElementById("statusText");
+    const attemptsText = document.getElementById("attempts");
+    const rangeHint = document.getElementById("rangeHint");
+    const bestScore = document.getElementById("bestScore");
+    const hintsLeftText = document.getElementById("hintsLeft");
+    const guessBtn = document.getElementById("guessBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const newGameBtn = document.getElementById("newGameBtn");
+    const hintBtn = document.getElementById("hintBtn");
+    const soundToggle = document.getElementById("soundToggle");
 
-  let mode = "normal";
-  let secret = 0;
-  let attempts = 0;
-  let hintsLeft = 0;
-  let gameOver = false;
+    function beep(type){
+      if(!soundToggle.checked) return;
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
 
-  function beep(type){
-    if(!soundToggle.checked) return;
-    try{
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      let freq = 440, duration = 0.09;
-      if(type === "low") freq = 320;
-      if(type === "high") freq = 620;
-      if(type === "win"){ freq = 880; duration = 0.14; }
-      if(type === "error") freq = 200;
-      if(type === "hint") freq = 520;
-      o.frequency.value = freq;
-      g.gain.value = 0.06;
-      o.connect(g); g.connect(ctx.destination);
-      o.start(); o.stop(ctx.currentTime + duration);
-      setTimeout(() => ctx.close(), 200);
-    } catch {}
-  }
+        let freq = 440, duration = 0.09;
+        if(type === "low") freq = 320;
+        if(type === "high") freq = 620;
+        if(type === "win"){ freq = 880; duration = 0.14; }
+        if(type === "error") freq = 200;
+        if(type === "hint") freq = 520;
 
-  function bestKey(m){ return `guess_best_${m}`; }
-  function getBest(m){
-    const v = localStorage.getItem(bestKey(m));
-    return v ? Number(v) : null;
-  }
-  function setBest(m, tries){
-    localStorage.setItem(bestKey(m), String(tries));
-  }
-
-  function randInt(min, max){
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-  function setMessage(html){ statusText.innerHTML = html; }
-
-  function syncUI(){
-    attemptsEl.textContent = attempts;
-    hintsLeftEl.textContent = hintsLeft;
-    const best = getBest(mode);
-    bestScoreEl.textContent = best ? `${best} tries` : "—";
-    hintBtn.disabled = gameOver || hintsLeft <= 0;
-    guessBtn.disabled = gameOver;
-  }
-
-  function startGame(){
-    mode = difficultyEl.value;
-    const cfg = DIFF[mode];
-
-    secret = randInt(cfg.min, cfg.max);
-    attempts = 0;
-    hintsLeft = cfg.hints;
-    gameOver = false;
-
-    guessInput.min = cfg.min;
-    guessInput.max = cfg.max;
-    guessInput.placeholder = `Enter guess (${cfg.min}-${cfg.max})`;
-
-    setMessage(`Game started. Guess a number between <strong>${cfg.min}</strong> and <strong>${cfg.max}</strong>.`);
-    guessInput.value = "";
-    guessInput.focus();
-    syncUI();
-  }
-
-  function handleGuess(){
-    if(gameOver) return;
-
-    const raw = guessInput.value;
-    const guess = Number(raw);
-    const cfg = DIFF[mode];
-
-    if(!raw){
-      beep("error");
-      setMessage("Type a number first.");
-      return;
-    }
-    if(guess < cfg.min || guess > cfg.max){
-      beep("error");
-      setMessage(`Keep it between <strong>${cfg.min}</strong> and <strong>${cfg.max}</strong>.`);
-      return;
+        o.frequency.value = freq;
+        g.gain.value = 0.06;
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + duration);
+        setTimeout(() => ctx.close(), 200);
+      } catch {}
     }
 
-    attempts++;
-    if(guess === secret){
-      beep("win");
-      gameOver = true;
+    function bestKey(m){ return `guess_best_${m}`; }
+    function getBest(m){
+      const v = localStorage.getItem(bestKey(m));
+      return v ? Number(v) : null;
+    }
+    function setBest(m, tries){
+      localStorage.setItem(bestKey(m), String(tries));
+    }
+
+    function setMessage(msg){ statusText.textContent = msg; }
+
+    function updateUI(){
+      attemptsText.textContent = attempts;
+      hintsLeftText.textContent = hintsLeft;
+
       const best = getBest(mode);
-      if(!best || attempts < best){
-        setBest(mode, attempts);
-        setMessage(`✅ Correct! It was <strong>${secret}</strong>. You got it in <strong>${attempts}</strong> tries. 🏆 New best!`);
-      } else {
-        setMessage(`✅ Correct! It was <strong>${secret}</strong>. You got it in <strong>${attempts}</strong> tries.`);
+      bestScore.textContent = best ? `${best} tries` : "—";
+
+      rangeHint.textContent = `Range: ${minRange}–${maxRange}`;
+      guessBtn.disabled = gameOver;
+      hintBtn.disabled = gameOver || hintsLeft <= 0;
+    }
+
+    function startGame(){
+      mode = difficultyEl.value;
+      const cfg = DIFF[mode];
+
+      secretNumber = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+      attempts = 0;
+      minRange = cfg.min;
+      maxRange = cfg.max;
+      hintsLeft = cfg.hints;
+      gameOver = false;
+
+      guessInput.min = cfg.min;
+      guessInput.max = cfg.max;
+      guessInput.placeholder = `Enter a number (${cfg.min}-${cfg.max})`;
+
+      setMessage("Make your first guess 👀");
+      guessInput.value = "";
+      guessInput.focus();
+      updateUI();
+    }
+
+    function handleGuess(){
+      if(gameOver) return;
+
+      const guess = Number(guessInput.value);
+      const cfg = DIFF[mode];
+
+      if(!guessInput.value){
+        beep("error");
+        setMessage("Type a number first.");
+        return;
       }
-      syncUI();
-      return;
+
+      if(guess < cfg.min || guess > cfg.max){
+        beep("error");
+        setMessage(`Keep it between ${cfg.min} and ${cfg.max}.`);
+        return;
+      }
+
+      attempts++;
+      attemptsText.textContent = attempts;
+
+      if(guess === secretNumber){
+        beep("win");
+        setMessage(`✅ Correct! The number was ${secretNumber}. You got it in ${attempts} tries.`);
+        gameOver = true;
+
+        const best = getBest(mode);
+        if(!best || attempts < best){
+          setBest(mode, attempts);
+        }
+
+        updateUI();
+        return;
+      }
+
+      if(guess < secretNumber){
+        beep("low");
+        setMessage("Too low ⬇️ Try again.");
+        if(guess >= minRange) minRange = guess + 1;
+      } else {
+        beep("high");
+        setMessage("Too high ⬆️ Try again.");
+        if(guess <= maxRange) maxRange = guess - 1;
+      }
+
+      rangeHint.textContent = `Range: ${minRange}–${maxRange}`;
+      guessInput.value = "";
+      guessInput.focus();
+      updateUI();
     }
 
-    if(guess < secret){
-      beep("low");
-      setMessage("Too low ⬇️ Try again.");
-    } else {
-      beep("high");
-      setMessage("Too high ⬆️ Try again.");
+    function giveHint(){
+      if(gameOver) return;
+      if(hintsLeft <= 0){
+        setMessage("No hints left.");
+        return;
+      }
+
+      hintsLeft--;
+      beep("hint");
+
+      const cfg = DIFF[mode];
+      const type = Math.random() < 0.5 ? "parity" : "window";
+
+      if(type === "parity"){
+        setMessage(`💡 Hint: The number is ${secretNumber % 2 === 0 ? "EVEN" : "ODD"}.`);
+      } else {
+        const spread = Math.max(6, Math.floor((cfg.max - cfg.min) * 0.08));
+        const lo = Math.max(cfg.min, secretNumber - spread);
+        const hi = Math.min(cfg.max, secretNumber + spread);
+        setMessage(`💡 Hint: The number is between ${lo} and ${hi}.`);
+      }
+
+      updateUI();
     }
 
-    guessInput.value = "";
-    guessInput.focus();
-    syncUI();
-  }
+    // Events
+    guessBtn.addEventListener("click", handleGuess);
+    guessInput.addEventListener("keydown", (e) => { if(e.key === "Enter") handleGuess(); });
+    resetBtn.addEventListener("click", startGame);
+    newGameBtn.addEventListener("click", startGame);
+    hintBtn.addEventListener("click", giveHint);
+    difficultyEl.addEventListener("change", startGame);
 
-  function giveHint(){
-    if(gameOver) return;
-    if(hintsLeft <= 0){
-      setMessage("No hints left.");
-      return;
-    }
-    hintsLeft--;
-    beep("hint");
-
-    const cfg = DIFF[mode];
-    if(Math.random() < 0.5){
-      setMessage(`💡 Hint: The number is <strong>${secret % 2 === 0 ? "EVEN" : "ODD"}</strong>.`);
-    } else {
-      const spread = Math.max(6, Math.floor((cfg.max - cfg.min) * 0.08));
-      const lo = Math.max(cfg.min, secret - spread);
-      const hi = Math.min(cfg.max, secret + spread);
-      setMessage(`💡 Hint: The number is between <strong>${lo}</strong> and <strong>${hi}</strong>.`);
-    }
-    syncUI();
-  }
-
-  newGameBtn.addEventListener("click", startGame);
-  guessBtn.addEventListener("click", handleGuess);
-  hintBtn.addEventListener("click", giveHint);
-  guessInput.addEventListener("keydown", (e) => {
-    if(e.key === "Enter") handleGuess();
-  });
-
-  // Show best score for default mode
-  syncUI();
-</script>
+    // Auto start
+    startGame();
+  </script>
 </body>
 </html>
